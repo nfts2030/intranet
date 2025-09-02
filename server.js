@@ -166,14 +166,39 @@ app.post('/api/contacto', async (req, res) => {
         html: `<p>Su solicitud ha sido recibida. Número de referencia: <strong>${referencia}</strong></p>`
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error sending email:', error);
-            // Send a JSON response indicating partial success
-            return res.json({ success: true, message: 'Datos recibidos, pero hubo un problema al enviar el correo de confirmación.' });
-        }
-        res.json({ success: true, message: '¡Éxito! Datos recibidos y correo de confirmación enviado.' });
-    });
+    try {
+        // 1. Send confirmation email to the user
+        await transporter.sendMail(mailOptions);
+        console.log('Confirmation email sent to user.');
+
+        // 2. Send notification email to the company
+        const notificationMailOptions = {
+            from: process.env.MAIL_FROM,
+            to: process.env.MAIL_TO,
+            subject: `Nuevo Mensaje de Contacto (${categoria}): ${asunto}`,
+            html: `
+                <h1>Nuevo Mensaje de Contacto</h1>
+                <p><strong>Referencia:</strong> ${referencia}</p>
+                <p><strong>Categoría (Gemini):</strong> ${categoria}</p>
+                <hr>
+                <p><strong>Nombre:</strong> ${nombre}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Teléfono:</strong> ${telefono || 'No proporcionado'}</p>
+                <hr>
+                <p><strong>Asunto:</strong> ${asunto}</p>
+                <p><strong>Mensaje:</strong></p>
+                <p>${mensaje.replace(/\n/g, '<br>')}</p>
+            `
+        };
+        await transporter.sendMail(notificationMailOptions);
+        console.log('Notification email sent to admin.');
+
+        res.json({ success: true, message: '¡Éxito! Datos recibidos y correos enviados.' });
+
+    } catch (error) {
+        console.error('Error sending email(s):', error);
+        res.json({ success: true, message: 'Datos recibidos, pero hubo un problema al enviar uno o más correos.' });
+    }
 });
 
 app.get('/admin/data', async (req, res) => {
