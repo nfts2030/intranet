@@ -53,17 +53,20 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Manejador de errores 404
-app.use((req, res) => {
-    res.status(404).send('404 - Not Found');
+// Ruta de prueba para verificar que el servidor está funcionando
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'API is running' });
 });
 
-// Iniciar el servidor solo si no estamos en Vercel
-if (process.env.VERCEL !== '1') {
-    app.listen(port, () => {
-        console.log(`Servidor corriendo en http://localhost:${port}`);
+// Manejador de errores 404
+app.use((req, res, next) => {
+    console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ 
+        error: 'Ruta no encontrada',
+        path: req.path,
+        method: req.method
     });
-}
+});
 
 async function analyzeMessage(asunto, mensaje) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
@@ -89,10 +92,45 @@ async function analyzeMessage(asunto, mensaje) {
   return result.response.text().trim();
 }
 
-// Ruta para manejar tanto /api/contacto como /contacto
-app.post(['/contacto', '/api/contacto'], async (req, res) => {
+// Ruta para /api/contacto
+app.post('/api/contacto', async (req, res) => {
+    console.log('=== INICIO DE SOLICITUD A /api/contacto ===');
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('API Route - Received POST to /api/contacto');
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+
+    // Verificar que el cuerpo de la solicitud no esté vacío
+    if (!req.body || Object.keys(req.body).length === 0) {
+        const errorMsg = 'Error: Cuerpo de la solicitud vacío';
+        console.error(errorMsg);
+        return res.status(400).json({ 
+            success: false,
+            error: errorMsg,
+            receivedBody: req.body
+        });
+    }
     console.log('Received request body:', req.body);
+    // Extraer y validar campos requeridos
     const { nombre, email, telefono, asunto, mensaje } = req.body;
+    
+    if (!nombre || !email || !mensaje) {
+        const errorMsg = 'Error: Faltan campos requeridos';
+        console.error(errorMsg);
+        return res.status(400).json({ 
+            success: false,
+            error: errorMsg,
+            required: ['nombre', 'email', 'mensaje'],
+            received: { 
+                nombre: !!nombre, 
+                email: !!email, 
+                mensaje: !!mensaje,
+                telefono: !!telefono,
+                asunto: !!asunto
+            }
+        });
+    }
     const referencia = uuidv4();
 
     const { data: insertData, error: insertError } = await supabase
@@ -102,7 +140,11 @@ app.post(['/contacto', '/api/contacto'], async (req, res) => {
 
     if (insertError) {
         console.error('Error inserting data into Supabase:', insertError);
-        return res.status(500).send('Error al guardar los datos');
+        return res.status(500).json({
+            success: false,
+            error: 'Error al guardar los datos en la base de datos',
+            details: insertError
+        });
     }
 
         const categoria = await analyzeMessage(asunto, mensaje);

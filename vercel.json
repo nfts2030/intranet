@@ -12,19 +12,24 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/(?<path>.*)",
       "dest": "/server.js"
     },
     {
       "src": "/contacto",
+      "methods": ["POST"],
       "dest": "/server.js"
     },
     {
-      "src": "/(.*)",
+      "src": "^/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "^/(.*)$",
       "dest": "/public/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "^/(.*)",
       "dest": "/server.js"
     }
   ]
