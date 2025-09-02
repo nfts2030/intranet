@@ -1,0 +1,14 @@
+PETGAS México Contact Form Backup
+Version: 1.0
+Build Date: Sat Aug 30 08:52:53 AM EST 2025
+Build Host: ricardo-MS-7D14
+Git Commit: 4493fe6
+
+Files in this deployment:
+-rw-rw-r--  1 ricardo ricardo  1053 Aug 30 08:52 CHECKLIST.txt
+-rw-rw-r--  1 ricardo ricardo  4379 Aug 30 08:52 .htaccess
+-rw-rw-r--  1 ricardo ricardo 19013 Aug 30 08:52 index.html
+-rw-rw-r--  1 ricardo ricardo   777 Aug 30 08:52 INSTALL.txt
+-rw-rw-r--  1 ricardo ricardo 18682 Aug 30 08:52 process_contact.php
+-rw-rw-r--  1 ricardo ricardo 10364 Aug 30 08:52 README_GODADDY.md
+-rw-rw-r--  1 ricardo ricardo     0 Aug 30 08:52 VERSION.txt

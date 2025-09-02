@@ -1,0 +1,7 @@
+{
+    "require": {
+        "supabase/supabase-php": "*",
+        "google-gemini-php/client": "*",
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}

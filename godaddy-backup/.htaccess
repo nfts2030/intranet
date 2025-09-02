@@ -1,0 +1,131 @@
+# PETGAS México - Contact Form Configuration for GoDaddy Shared Hosting
+# .htaccess file for security and optimization
+
+# Enable error reporting for debugging (remove in production)
+# php_flag display_errors on
+# php_flag log_errors on
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Enable compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Browser caching
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/ico "access plus 1 month"
+    ExpiresByType image/icon "access plus 1 month"
+    ExpiresByType text/html "access plus 1 day"
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always append X-Frame-Options SAMEORIGIN
+
+    # XSS Protection
+    Header set X-XSS-Protection "1; mode=block"
+
+    # Content Type sniffing
+    Header set X-Content-Type-Options nosniff
+
+    # Referrer Policy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # CORS headers for AJAX requests
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, X-Requested-With"
+    Header set Access-Control-Max-Age "3600"
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "\.(log|json|txt)$">
+    <RequireAll>
+        Require local
+        Require ip 127.0.0.1
+    </RequireAll>
+</FilesMatch>
+
+# Block access to system files
+<FilesMatch "^(contact_log|rate_limit|submissions_|failed_submissions_).*">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# PHP configuration
+<IfModule mod_php7.c>
+    # Increase memory limit if needed
+    php_value memory_limit 128M
+
+    # Set max execution time
+    php_value max_execution_time 30
+
+    # Set upload limits
+    php_value upload_max_filesize 2M
+    php_value post_max_size 8M
+
+    # Session settings
+    php_value session.cookie_httponly 1
+    php_value session.cookie_secure 1
+    php_value session.use_strict_mode 1
+
+    # Disable dangerous functions
+    php_value disable_functions "exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source"
+</IfModule>
+
+# Pretty URLs (if needed)
+RewriteEngine On
+
+# Handle OPTIONS requests for CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Redirect to HTTPS (uncomment if SSL is available)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Custom error pages
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+# Prevent directory browsing
+Options -Indexes
+
+# Protect against hotlinking
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?petgas\.com\.mx [NC]
+RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?google\. [NC]
+RewriteRule \.(jpg|jpeg|png|gif)$ - [NC,F,L]
+
+# Rate limiting (basic protection)
+<IfModule mod_rewrite.c>
+    # Block if more than 10 requests per minute from same IP
+    RewriteMap requests_per_minute prg:/usr/local/bin/rate_limit.pl
+    RewriteCond ${requests_per_minute:%{REMOTE_ADDR}} >10
+    RewriteRule . - [F,L]
+</IfModule>
+
+# Content Security Policy (uncomment and adjust as needed)
+# <IfModule mod_headers.c>
+#     Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';"
+# </IfModule>

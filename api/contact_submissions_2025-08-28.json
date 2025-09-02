@@ -1,0 +1,40 @@
+{
+    "timestamp": "2025-08-28 04:45:29",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "subject": "Test Subject",
+    "message": "This is a test message"
+},
+{
+    "timestamp": "2025-08-28 04:49:10",
+    "name": "Ricardo Duhalt",
+    "email": "ricardoduhalt@protonmail.com",
+    "phone": "9997052637",
+    "subject": "cotizacion",
+    "message": "chunk-WRD5HZVH.js?v=8876295e:21551 Download the React DevTools for a better development experience: https:\/\/reactjs.org\/link\/react-devtools\nreact-router-dom.js?v=8876295e:4393 \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https:\/\/reactrouter.com\/v6\/upgrading\/future#v7_starttransition.\nwarnOnce @ react-router-dom.js?v=8876295e:4393\nlogDeprecation @ react-router-dom.js?v=8876295e:4396\nlogV6DeprecationWarnings @ react-router-dom.js?v=8876295e:4399\n(anonymous) @ react-router-dom.js?v=8876295e:5271\ncommitHookEffectListMount @ chunk-WRD5HZVH.js?v=8876295e:16915\ncommitPassiveMountOnFiber @ chunk-WRD5HZVH.js?v=8876295e:18156\ncommitPassiveMountEffects_complete @ chunk-WRD5HZVH.js?v=8876295e:18129\ncommitPassiveMountEffects_begin @ chunk-WRD5HZVH.js?v=8876295e:18119\ncommitPassiveMountEffects @ chunk-WRD5HZVH.js?v=8876295e:18109\nflushPassiveEffectsImpl @ chunk-WRD5HZVH.js?v=8876295e:19490\nflushPassiveEffects @ chunk-WRD5HZVH.js?v=8876295e:19447\n(anonymous) @ chunk-WRD5HZVH.js?v=8876295e:19328\nworkLoop @ chunk-WRD5HZVH.js?v=8876295e:197\nflushWork @ chunk-WRD5HZVH.js?v=8876295e:176\nperformWorkUntilDeadline @ chunk-WRD5HZVH.js?v=8876295e:384\nreact-router-dom.js?v=8876295e:4393 \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https:\/\/reactrouter.com\/v6\/upgrading\/future#v7_relativesplatpath.\nwarnOnce @ react-router-dom.js?v=8876295e:4393\nlogDeprecation @ react-router-dom.js?v=8876295e:4396\nlogV6DeprecationWarnings @ react-router-dom.js?v=8876295e:4402\n(anonymous) @ react-router-dom.js?v=8876295e:5271\ncommitHookEffectListMount @ chunk-WRD5HZVH.js?v=8876295e:16915\ncommitPassiveMountOnFiber @ chunk-WRD5HZVH.js?v=8876295e:18156\ncommitPassiveMountEffects_complete @ chunk-WRD5HZVH.js?v=8876295e:18129\ncommitPassiveMountEffects_begin @ chunk-WRD5HZVH.js?v=8876295e:18119\ncommitPassiveMountEffects @ chunk-WRD5HZVH.js?v=8876295e:18109\nflushPassiveEffectsImpl @ chunk-WRD5HZVH.js?v=8876295e:19490\nflushPassiveEffects @ chunk-WRD5HZVH.js?v=8876295e:19447\n(anonymous) @ chunk-WRD5HZVH.js?v=8876295e:19328\nworkLoop @ chunk-WRD5HZVH.js?v=8876295e:197\nflushWork @ chunk-WRD5HZVH.js?v=8876295e:176\nperformWorkUntilDeadline @ chunk-WRD5HZVH.js?v=8876295e:384\nchunk-OU5AQDZK.js?v=8876295e:903 Uncaught TypeError: Failed to fetch dynamically imported module: http:\/\/localhost:3000\/src\/pages\/ContactoPage.tsx\nchunk-OU5AQDZK.js?v=8876295e:903 Uncaught TypeError: Failed to fetch dynamically imported module: http:\/\/localhost:3000\/src\/pages\/ContactoPage.tsx\nchunk-WRD5HZVH.js?v=8876295e:14032 The above error occurred in one of your React components:\n\n    at Lazy\n    at RenderedRoute (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/react-router-dom.js?v=8876295e:4088:5)\n    at Routes (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/react-router-dom.js?v=8876295e:4558:5)\n    at Suspense\n    at main\n    at O2 (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/styled-components.js?v=8876295e:1176:6)\n    at div\n    at O2 (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/styled-components.js?v=8876295e:1176:6)\n    at LanguageProvider (http:\/\/localhost:3000\/src\/contexts\/LanguageContext.tsx:26:36)\n    at _a (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/react-helmet-async.js?v=8876295e:559:5)\n    at App (http:\/\/localhost:3000\/src\/App.tsx:75:3)\n    at Router (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/react-router-dom.js?v=8876295e:4501:15)\n    at BrowserRouter (http:\/\/localhost:3000\/node_modules\/.vite\/deps\/react-router-dom.js?v=8876295e:5247:5)\n\nConsider adding an error boundary to your tree to customize error handling behavior.\nVisit https:\/\/reactjs.org\/link\/error-boundaries to learn more about error boundaries.\nlogCapturedError @ chunk-WRD5HZVH.js?v=8876295e:14032\nupdate.callback @ chunk-WRD5HZVH.js?v=8876295e:14052\ncallCallback @ chunk-WRD5HZVH.js?v=8876295e:11248\ncommitUpdateQueue @ chunk-WRD5HZVH.js?v=8876295e:11265\ncommitLayoutEffectOnFiber @ chunk-WRD5HZVH.js?v=8876295e:17093\ncommitLayoutMountEffects_complete @ chunk-WRD5HZVH.js?v=8876295e:17980\ncommitLayoutEffects_begin @ chunk-WRD5HZVH.js?v=8876295e:17969\ncommitLayoutEffects @ chunk-WRD5HZVH.js?v=8876295e:17920\ncommitRootImpl @ chunk-WRD5HZVH.js?v=8876295e:19353\ncommitRoot @ chunk-WRD5HZVH.js?v=8876295e:19277\nfinishConcurrentRender @ chunk-WRD5HZVH.js?v=8876295e:18760\nperformConcurrentWorkOnRoot @ chunk-WRD5HZVH.js?v=8876295e:18718\nworkLoop @ chunk-WRD5HZVH.js?v=8876295e:197\nflushWork @ chunk-WRD5HZVH.js?v=8876295e:176\nperformWorkUntilDeadline @ chunk-WRD5HZVH.js?v=8876295e:384\nchunk-WRD5HZVH.js?v=8876295e:19413 Uncaught TypeError: Failed to fetch dynamically imported module: http:\/\/localhost:3000\/src\/pages\/ContactoPage.tsx"
+},
+{
+    "timestamp": "2025-08-28 04:50:38",
+    "name": "Ricardo Duhalt",
+    "email": "ricardoduhalt@protonmail.com",
+    "phone": "9997052637",
+    "subject": "soporte",
+    "message": "hola mundo"
+},
+{
+    "timestamp": "2025-08-28 05:00:35",
+    "name": "Test User",
+    "email": "test@example.com",
+    "phone": "1234567890",
+    "subject": "Test Subject",
+    "message": "This is a test message"
+},
+{
+    "timestamp": "2025-08-28 05:08:43",
+    "name": "Ricardo Duhalt",
+    "email": "ricardoduhalt@protonmail.com",
+    "phone": "9997052637",
+    "subject": "ventas",
+    "message": "NyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tPNyeaR[QcW;tP"
+},

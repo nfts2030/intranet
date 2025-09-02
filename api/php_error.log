@@ -1,0 +1,27 @@
+[30-Aug-2025 18:49:57 UTC] PHP Fatal error:  Uncaught Error: Class "Supabase\SupabaseClient" not found in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php:59
+Stack trace:
+#0 {main}
+  thrown in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php on line 59
+[30-Aug-2025 18:50:39 UTC] PHP Fatal error:  Uncaught Error: Class "Supabase\SupabaseClient" not found in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php:59
+Stack trace:
+#0 {main}
+  thrown in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php on line 59
+[30-Aug-2025 20:43:38 UTC] PHP Fatal error:  Uncaught Error: Class "Supabase\SupabaseClient" not found in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php on line 60
+[30-Aug-2025 20:45:24 UTC] Supabase\SupabaseClient class does not exist.
+[30-Aug-2025 20:45:24 UTC] PHP Fatal error:  Uncaught Error: Class "Supabase\SupabaseClient" not found in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php:71
+Stack trace:
+#0 {main}
+  thrown in /home/ricardo/projects/petgasmobile/petgasmobile/INTRANET/api/contact.php on line 71
+[30-Aug-2025 20:46:45 UTC] Gemini API call failed: Invalid JSON response from Gemini API: <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL was not found on this server.</p>
+<hr>
+<address>Apache/2.4.58 (Ubuntu) Server at localhost Port 80</address>
+</body></html>
+

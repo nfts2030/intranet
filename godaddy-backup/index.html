@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacto - PETGAS México</title>
+    <link rel="icon" type="image/png" href="https://petgasmexico-v2.vercel.app/img/hero/logoGlow.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.6;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+      }
+
+      .header h1 {
+        color: #0a4b2a;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: #0a4b2a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+      }
+
+      .contact-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      @media (max-width: 768px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #0a4b2a;
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 0 0 0 3px rgba(10, 75, 42, 0.1);
+        transform: translateY(-2px);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+      }
+
+      .checkbox-group input[type='checkbox'] {
+        width: auto;
+        margin-top: 0.25rem;
+        transform: scale(1.2);
+      }
+
+      .checkbox-group label {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .submit-btn {
+        background: linear-gradient(135deg, #0a4b2a 0%, #0d6a3a 100%);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(10, 75, 42, 0.3);
+      }
+
+      .submit-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .submit-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .loading-spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      .submit-btn.loading .btn-text {
+        opacity: 0;
+      }
+
+      .submit-btn.loading .loading-spinner {
+        display: block;
+      }
+
+      .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        font-weight: 500;
+        display: none;
+        position: relative;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .alert.success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border-left: 4px solid #28a745;
+      }
+
+      .alert.error {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+      }
+
+      .alert.warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border-left: 4px solid #ffc107;
+      }
+
+      .alert-icon {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+      }
+
+      .contact-info {
+        margin-top: 3rem;
+        text-align: center;
+        padding: 2rem;
+        background: rgba(10, 75, 42, 0.05);
+        border-radius: 15px;
+      }
+
+      .contact-info h3 {
+        color: #0a4b2a;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+      }
+
+      .contact-item {
+        display: inline-flex;
+        align-items: center;
+        margin: 0.5rem 1rem;
+        color: #666;
+        font-size: 0.95rem;
+      }
+
+      .contact-item i {
+        margin-right: 0.5rem;
+        color: #0a4b2a;
+        width: 20px;
+        text-align: center;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 2rem;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      /* Animations */
+      .contact-card {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Floating labels effect */
+      .form-group.floating {
+        position: relative;
+      }
+
+      .form-group.floating input:focus + label,
+      .form-group.floating input:not(:placeholder-shown) + label,
+      .form-group.floating select:focus + label,
+      .form-group.floating textarea:focus + label,
+      .form-group.floating textarea:not(:placeholder-shown) + label {
+        transform: translateY(-25px) scale(0.8);
+        color: #0a4b2a;
+        background: white;
+        padding: 0 5px;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container {
+          padding: 0 15px;
+        }
+
+        .contact-card {
+          padding: 2rem 1.5rem;
+          border-radius: 15px;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .contact-item {
+          display: block;
+          text-align: center;
+          margin: 0.75rem 0;
+        }
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #0a4b2a;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #0d6a3a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <style>
+        .marquee-container {
+          background: linear-gradient(135deg, #0a4b2a, #0d6a3a);
+          color: #fff;
+          padding: 0.7rem 0;
+          overflow: hidden;
+          width: 100%;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          white-space: nowrap;
+          font-size: 0.95rem;
+          font-weight: 600;
+          line-height: 1.3;
+          height: 44px;
+          display: flex !important;
+          align-items: center;
+          z-index: 1000;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .marquee-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(135deg, #00c853, #69f0ae);
+        }
+        @media (min-width: 768px) {
+          .marquee-container {
+            font-size: 1.05rem;
+            height: 48px;
+            padding: 0.8rem 0;
+          }
+        }
+        .header-container {
+          background-color: rgba(10, 75, 42, 0.98);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          padding: 0.75rem 1.5rem;
+          position: fixed;
+          top: 44px;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          border-bottom: 1px solid rgba(240, 253, 244, 0.1);
+        }
+        @media (min-width: 768px) {
+          .header-container {
+            padding: 1rem 2rem;
+            top: 48px;
+          }
+        }
+        .nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          max-width: 1200px;
+          margin: 0 auto;
+          position: relative;
+        }
+        .logo img {
+          height: 40px;
+          width: auto;
+          transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        .logo:hover img {
+          transform: scale(1.05);
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+        @media (min-width: 768px) {
+          .logo img {
+            height: 50px;
+          }
+        }
+        .nav-links {
+          display: block;
+        }
+        .nav-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 1.25rem;
+        }
+        @media (min-width: 1200px) {
+          .nav-list {
+            gap: 2rem;
+          }
+        }
+        .nav-item {
+          position: relative;
+        }
+        .nav-link {
+          color: #fff;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 1rem;
+          letter-spacing: 0.5px;
+          padding: 0.75rem 1rem;
+          display: flex;
+          align-items: center;
+          position: relative;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border-radius: 8px;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .nav-link:hover {
+          color: #fff;
+          background: rgba(255, 255, 255, 0.1);
+        }
+        .nav-link.highlight {
+          background: linear-gradient(135deg, #00c853, #00e676);
+          color: #fff !important;
+          font-weight: 700;
+          padding: 0.75rem 1.25rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-link.highlight:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
+          background: linear-gradient(135deg, #00c853, #69f0ae);
+        }
+        body {
+          padding-top: 128px;
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      </style>
+      <div class="marquee-container">
+        <div
+          style="
+            display: inline-flex !important;
+            align-items: center;
+            white-space: nowrap;
+            position: relative;
+            padding: 0 1rem;
+            animation: marquee 30s linear infinite;
+          "
+        >
+          <span
+            style="
+              display: inline-flex !important;
+              align-items: center;
+              padding: 0 1.5rem;
+              position: relative;
+              white-space: nowrap;
+              font-weight: 500;
+              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+              flex-shrink: 0;
+            "
+          >
+            <span
+              style="
+                display: inline-flex;
+                align-items: center;
+                white-space: nowrap;
+                font-size: 0.9em;
+              "
+              >BIENVENIDO A PETGAS MÉXICO</span
+            >
+            <img
+              src="https://petgasmexico-v2.vercel.app/img/bote_gasolina.png"
+              alt="Bote de gasolina"
+              style="
+                height: 28px;
+                height: 24px;
+                width: auto;
+                margin: 0 0.75rem;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 5px rgba(17, 145, 75, 0.6));
+                transition:
+                  transform 0.3s ease,
+                  filter 0.3s ease;
+                flex-shrink: 0;
+                position: relative;
+                z-index: 2;
+              "
+            />
+            <span
+              style="
+                display: inline-flex;
+                align-items: center;
+                white-space: nowrap;
+                font-size: 0.9em;
+                color: #b3ff00;
+                font-weight: 600;
+              "
+              >Transformando residuos plásticos en energía sostenible</span
+            >
+            <img
+              src="https://petgasmexico-v2.vercel.app/img/hero/logoGlow.png"
+              alt="PETGAS Logo"
+              style="
+                height: 32px;
+                height: 24px;
+                width: auto;
+                margin: 0 0.75rem;
+                vertical-align: middle;
+                filter: drop-shadow(0 0 5px rgba(17, 145, 75, 0.6));
+                transition:
+                  transform 0.3s ease,
+                  filter 0.3s ease;
+                flex-shrink: 0;
+                position: relative;
+                z-index: 2;
+              "
+            />
+          </span>
+        </div>
+      </div>
+      <header class="header-container">
+        <div class="nav">
+          <a href="https://petgasmexico-v2.vercel.app/" class="logo">
+            <img src="https://petgasmexico-v2.vercel.app/img/logo-header.png" alt="PETGAS Logo" />
+          </a>
+          <nav class="nav-links">
+            <ul class="nav-list">
+              <li class="nav-item">
+                <a href="https://petgasmexico-v2.vercel.app/" class="nav-link">INICIO</a>
+              </li>
+              <li class="nav-item">
+                <a href="https://petgasmexico-v2.vercel.app/maquinas" class="nav-link"
+                  >NUESTRAS MÁQUINAS</a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="https://petgasmexico-v2.vercel.app/combustibles" class="nav-link"
+                  >COMBUSTIBLES</a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="https://petgasmexico-v2.vercel.app/creditos" class="nav-link"
+                  >CRÉDITOS PLÁSTICOS</a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="https://petgasmexico-v2.vercel.app/intranet" class="nav-link highlight"
+                  >INTRANET</a
+                >
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+      <div class="header">
+        <h1>Contáctanos</h1>
+        <p>Estamos aquí para ayudarte con todas tus necesidades energéticas</p>
+      </div>
+
+      <div class="contact-card">
+        <div id="alertContainer"></div>
+
+        <form id="contactForm" action="process_contact.php" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Nombre Completo *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                placeholder="Ej: Juan Pérez García"
+                autocomplete="name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="email">Correo Electrónico *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                placeholder="ejemplo@correo.com"
+                autocomplete="email"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Teléfono</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="55 1234 5678"
+                autocomplete="tel"
+              />
+            </div>
+            <div class="form-group">
+              <label for="subject">Asunto *</label>
+              <select id="subject" name="subject" required>
+                <option value="">Selecciona un asunto</option>
+                <option value="cotizacion">Solicitud de Cotización</option>
+                <option value="ventas">Información de Ventas</option>
+                <option value="soporte">Soporte Técnico</option>
+                <option value="trabajo">Oportunidades de Trabajo</option>
+                <option value="prensa">Prensa y Medios</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mensaje *</label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              placeholder="Cuéntanos cómo podemos ayudarte..."
+            ></textarea>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="privacy" name="privacy" required />
+            <label for="privacy">
+              Acepto la
+              <a
+                href="/politica-privacidad"
+                target="_blank"
+                style="color: #0a4b2a; text-decoration: none"
+                >política de privacidad</a
+              >
+              y autorizo el tratamiento de mis datos personales conforme a la Ley Federal de
+              Protección de Datos Personales en Posesión de los Particulares. *
+            </label>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span class="btn-text"> <i class="fas fa-paper-plane"></i> Enviar Mensaje </span>
+            <div class="loading-spinner"></div>
+          </button>
+
+          <!-- Hidden fields for tracking -->
+          <input type="hidden" name="source" value="website_contact" />
+          <input type="hidden" name="timestamp" id="timestamp" />
+          <input type="hidden" name="timezone" id="timezone" />
+        </form>
+      </div>
+
+      <div class="footer">
+        <p>&copy; 2025 PETGAS México. Todos los derechos reservados.</p>
+        <p>Energía Limpia y Sostenible</p>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const alertContainer = document.getElementById('alertContainer');
+
+        // Form validation
+        function validateForm() {
+          const name = document.getElementById('name').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const subject = document.getElementById('subject').value;
+          const message = document.getElementById('message').value.trim();
+          const privacy = document.getElementById('privacy').checked;
+
+          if (!name || !email || !subject || !message || !privacy) {
+            showAlert(
+              'error',
+              'Por favor, completa todos los campos requeridos y acepta la política de privacidad.'
+            );
+            return false;
+          }
+
+          if (!isValidEmail(email)) {
+            showAlert('error', 'Por favor, ingresa un correo electrónico válido.');
+            return false;
+          }
+
+          return true;
+        }
+
+        function isValidEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        }
+
+        function showAlert(type, message) {
+          const alert = document.createElement('div');
+          alert.className = `alert ${type}`;
+          alert.style.display = 'block';
+
+          const icon =
+            type === 'success'
+              ? 'fas fa-check-circle'
+              : type === 'error'
+                ? 'fas fa-exclamation-circle'
+                : 'fas fa-exclamation-triangle';
+
+          alert.innerHTML = `<i class="${icon} alert-icon"></i>${message}`;
+
+          alertContainer.innerHTML = '';
+          alertContainer.appendChild(alert);
+
+          // Auto-hide after 5 seconds
+          setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+              if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+              }
+            }, 300);
+          }, 5000);
+
+          // Scroll to alert
+          alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function setLoading(loading) {
+          if (loading) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+          } else {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+          }
+        }
+
+        // Form submit handler
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          if (!validateForm()) {
+            return;
+          }
+
+          setLoading(true);
+
+          // Create FormData object
+          const formData = new FormData(form);
+
+          // Add hidden tracking fields
+          document.getElementById('timestamp').value = new Date().toISOString();
+          document.getElementById('timezone').value =
+            Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+          // Submit form via fetch
+          fetch('/api/contact.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              setLoading(false);
+
+              if (data.success) {
+                showAlert(
+                  'success',
+                  data.message ||
+                    '¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.'
+                );
+                form.reset(); // Clear form on success
+
+                // Optional: Send thank you analytics event
+                if (typeof gtag === 'function') {
+                  gtag('event', 'form_submit', {
+                    event_category: 'contact',
+                    event_label: 'contact_form_success',
+                  });
+                }
+              } else {
+                showAlert(
+                  'error',
+                  data.message ||
+                    'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo.'
+                );
+              }
+            })
+            .catch((error) => {
+              setLoading(false);
+              let errorMessage = 'Error de conexión. Por favor, verifica tu conexión a internet e inténtalo de nuevo.';
+
+              if (error.message.includes('HTTP 500')) {
+                errorMessage = 'Error del servidor. Por favor, inténtalo más tarde o contacta directamente por teléfono.';
+              } else if (error.message.includes('HTTP 400')) {
+                errorMessage = 'Datos del formulario incorrectos. Por favor, revisa los campos e inténtalo de nuevo.';
+              } else if (error instanceof SyntaxError) {
+                errorMessage = 'Error en la respuesta del servidor. Por favor, revisa los logs del servidor para más detalles.';
+              }
+
+              showAlert('error', errorMessage);
+              console.error('Contact form error:', error);
+            });
+        });
+
+        // Enhanced form interactions
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach((input) => {
+          input.addEventListener('focus', function () {
+            this.parentElement.classList.add('focused');
+          });
+
+          input.addEventListener('blur', function () {
+            this.parentElement.classList.remove('focused');
+          });
+
+          // Real-time validation feedback
+          input.addEventListener('input', function () {
+            if (this.type === 'email' && this.value) {
+              if (isValidEmail(this.value)) {
+                this.style.borderColor = '#28a745';
+              } else {
+                this.style.borderColor = '#dc3545';
+              }
+            }
+          });
+        });
+
+        // Animate elements on scroll (if Intersection Observer is supported)
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+              }
+            });
+          });
+
+          document.querySelectorAll('.contact-card, .contact-info').forEach((el) => {
+            observer.observe(el);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

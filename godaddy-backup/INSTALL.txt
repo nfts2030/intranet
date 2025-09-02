@@ -1,0 +1,21 @@
+PETGAS México - Contact Form Installation Instructions
+======================================================
+
+QUICK START:
+1. Upload all files to your GoDaddy hosting account
+2. Place in: /public_html/your-domain.com/contacto/
+3. Edit process_contact.php and change the email address (line ~25)
+4. Test by visiting: https://your-domain.com/contacto/
+
+FILES INCLUDED:
+- index.html          : Main contact form page
+- process_contact.php : Form processor (EDIT EMAIL ADDRESS!)
+- .htaccess          : Security and configuration
+- README_GODADDY.md  : Detailed documentation
+
+IMPORTANT:
+- Change 'contacto@petgas.com.mx' to your real email
+- Make sure your GoDaddy hosting has email configured
+- Test the form after installation
+
+For detailed instructions, see README_GODADDY.md

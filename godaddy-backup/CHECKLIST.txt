@@ -1,0 +1,35 @@
+Pre-Deployment Checklist for GoDaddy
+====================================
+
+□ GoDaddy hosting account is active
+□ Domain is properly configured
+□ Email account exists (contacto@petgas.com.mx or similar)
+□ FTP/File Manager access is available
+□ PHP is enabled on hosting account
+
+Post-Deployment Checklist
+=========================
+
+□ Files uploaded to correct directory (/public_html/domain/contacto/)
+□ File permissions are correct (644 for files, 755 for directories)
+□ Email address updated in process_contact.php
+□ Test form submission
+□ Check email delivery
+□ Verify logs are being created
+□ Test on mobile devices
+□ Check spam folder for test emails
+
+Troubleshooting
+==============
+
+If emails don't arrive:
+1. Check GoDaddy email configuration
+2. Review PHP error logs in cPanel
+3. Test with a simple PHP mail() function
+4. Contact GoDaddy support if needed
+
+If form doesn't work:
+1. Check file permissions
+2. Review .htaccess for errors
+3. Test process_contact.php directly
+4. Check browser console for JavaScript errors
