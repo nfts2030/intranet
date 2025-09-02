@@ -58,16 +58,6 @@ app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'API is running' });
 });
 
-// Manejador de errores 404
-app.use((req, res, next) => {
-    console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ 
-        error: 'Ruta no encontrada',
-        path: req.path,
-        method: req.method
-    });
-});
-
 async function analyzeMessage(asunto, mensaje) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
   const prompt = `
@@ -197,6 +187,16 @@ app.get('/admin/data', async (req, res) => {
     }
 
     res.json(data);
+});
+
+// Manejador de errores 404
+app.use((req, res, next) => {
+    console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ 
+        error: 'Ruta no encontrada',
+        path: req.path,
+        method: req.method
+    });
 });
 
 module.exports = app;
