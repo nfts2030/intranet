@@ -1,6 +1,17 @@
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, 'api', '.env') });
+
+// Verificar variables de entorno
+const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_KEY', 'GEMINI_API_KEY', 'SMTP_HOST', 'SMTP_USERNAME', 'SMTP_PASSWORD'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0 && process.env.NODE_ENV !== 'test') {
+    console.error('Faltan variables de entorno requeridas:', missingVars.join(', '));
+    if (process.env.NODE_ENV === 'production') {
+        process.exit(1);
+    }
+}
 const express = require('express');
 const bodyParser = require('body-parser');
 const { createClient } = require('@supabase/supabase-js');
@@ -34,8 +45,15 @@ app.get('/admin', (req, res) => {
 
 // Manejador de errores 404
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+    res.status(404).send('404 - Not Found');
 });
+
+// Iniciar el servidor solo si no estamos en Vercel
+if (process.env.VERCEL !== '1') {
+    app.listen(port, () => {
+        console.log(`Servidor corriendo en http://localhost:${port}`);
+    });
+}
 
 async function analyzeMessage(asunto, mensaje) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
@@ -61,7 +79,8 @@ async function analyzeMessage(asunto, mensaje) {
   return result.response.text().trim();
 }
 
-app.post('/contacto', async (req, res) => {
+// Ruta para manejar tanto /api/contacto como /contacto
+app.post(['/contacto', '/api/contacto'], async (req, res) => {
     console.log('Received request body:', req.body);
     const { nombre, email, telefono, asunto, mensaje } = req.body;
     const referencia = uuidv4();

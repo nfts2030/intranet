@@ -816,8 +816,9 @@
           formObject.timestamp = new Date().toISOString();
           formObject.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-          // Submit form via fetch as JSON
-          fetch('/api/contacto', {
+          // Submit form via fetch as JSON - Usando ruta relativa
+          const apiBaseUrl = window.location.hostname === 'localhost' ? '/api' : '';
+          fetch(`${apiBaseUrl}/contacto`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
