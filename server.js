@@ -22,16 +22,26 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Configuración de body-parser con límites aumentados
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Configuración de CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
 // Servir archivos estáticos desde la carpeta public
 app.use(express.static('public', {
     extensions: ['html', 'htm'],
     index: 'index.html'
 }));
+
+// Inicialización de clientes
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Ruta raíz para servir index.html
 app.get('/', (req, res) => {
