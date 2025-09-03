@@ -6,9 +6,6 @@
     <title>Admin - PetGas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- jsPDF Libraries for Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -132,7 +129,6 @@
                         <h2 class="text-xl font-bold text-gray-800">Todas las Incidencias</h2>
                         <div class="flex space-x-2">
                             <button id="export-csv-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 export-btn flex items-center"><i class="fas fa-file-csv mr-2"></i>Exportar a CSV</button>
-                            <button id="export-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 export-btn flex items-center"><i class="fas fa-file-pdf mr-2"></i>Exportar a PDF</button>
                         </div>
                     </div>
                     <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 pb-4 overflow-x-auto">
@@ -186,7 +182,6 @@
         const modal = document.getElementById('details-modal');
         const modalBody = document.getElementById('modal-body');
         const exportCsvBtn = document.getElementById('export-csv-btn');
-        const exportPdfBtn = document.getElementById('export-pdf-btn');
         let chart = null;
         let allData = [];
 
@@ -356,25 +351,6 @@
             document.body.removeChild(link);
         }
 
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.autoTable({
-                head: [['ID', 'Nombre', 'Email', 'Referencia', 'Categoria', 'Fecha']],
-                body: allData.map(row => [
-                    row.id,
-                    row.nombre,
-                    row.email,
-                    row.referencia,
-                    row.categoria || 'N/A',
-                    new Date(row.created_at).toLocaleDateString()
-                ]),
-            });
-
-            doc.save('incidencias_petgas.pdf');
-        }
-
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             loginError.textContent = '';
@@ -409,7 +385,6 @@
         });
 
         exportCsvBtn.addEventListener('click', exportToCSV);
-        exportPdfBtn.addEventListener('click', exportToPDF);
 
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('authToken');
