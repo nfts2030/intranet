@@ -1,18 +1,37 @@
 
 // Trigger redeploy
+console.log('--- Vercel Function Start ---');
+
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, 'api', '.env') });
+
+try {
+    console.log('Loading environment variables from .env file...');
+    require('dotenv').config({ path: path.join(__dirname, 'api', '.env') });
+    console.log('dotenv config loaded.');
+} catch (e) {
+    console.error('CRITICAL: Failed to load dotenv.', e);
+    process.exit(1);
+}
+
 
 // Verificar variables de entorno
+console.log('Checking environment variables...');
 const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_KEY', 'GEMINI_API_KEY', 'SMTP_HOST', 'SMTP_USERNAME', 'SMTP_PASSWORD', 'JWT_SECRET'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+const missingVars = requiredEnvVars.filter(varName => {
+    const exists = !!process.env[varName];
+    console.log(`- Checking var: ${varName}. Exists: ${exists}`);
+    return !exists;
+});
 
 if (missingVars.length > 0 && process.env.NODE_ENV !== 'test') {
-    console.error('Faltan variables de entorno requeridas:', missingVars.join(', '));
+    console.error('CRITICAL: Missing required environment variables:', missingVars.join(', '));
     if (process.env.NODE_ENV === 'production') {
         process.exit(1);
     }
 }
+console.log('Environment variables check passed.');
+
+console.log('Requiring dependencies...');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { createClient } = require('@supabase/supabase-js');
@@ -21,6 +40,9 @@ const { v4: uuidv4 } = require('uuid');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+console.log('Dependencies required.');
+
+console.log('Initializing Express app...');
 
 
 const app = express();
