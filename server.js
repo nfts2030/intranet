@@ -1,9 +1,10 @@
 
+// Trigger redeploy
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, 'api', '.env') });
 
 // Verificar variables de entorno
-const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_KEY', 'GEMINI_API_KEY', 'SMTP_HOST', 'SMTP_USERNAME', 'SMTP_PASSWORD'];
+const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_KEY', 'GEMINI_API_KEY', 'SMTP_HOST', 'SMTP_USERNAME', 'SMTP_PASSWORD', 'JWT_SECRET'];
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0 && process.env.NODE_ENV !== 'test') {
@@ -18,6 +19,9 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 // Configuración de CORS
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     next();
 });
 
@@ -95,7 +99,7 @@ app.post('/api/contacto', async (req, res) => {
     if (!req.body || Object.keys(req.body).length === 0) {
         const errorMsg = 'Error: Cuerpo de la solicitud vacío';
         console.error(errorMsg);
-        return res.status(400).json({ 
+        return res.status(400).json({
             success: false,
             error: errorMsg,
             receivedBody: req.body
@@ -108,13 +112,13 @@ app.post('/api/contacto', async (req, res) => {
     if (!nombre || !email || !mensaje) {
         const errorMsg = 'Error: Faltan campos requeridos';
         console.error(errorMsg);
-        return res.status(400).json({ 
+        return res.status(400).json({
             success: false,
             error: errorMsg,
             required: ['nombre', 'email', 'mensaje'],
-            received: { 
-                nombre: !!nombre, 
-                email: !!email, 
+            received: {
+                nombre: !!nombre,
+                email: !!email,
                 mensaje: !!mensaje,
                 telefono: !!telefono,
                 asunto: !!asunto
@@ -201,7 +205,113 @@ app.post('/api/contacto', async (req, res) => {
     }
 });
 
-app.get('/admin/data', async (req, res) => {
+// ============== AUTHENTICATION ==============
+
+// Middleware to verify JWT
+function verifyToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+
+    if (token == null) {
+        return res.status(401).json({ error: 'Acceso no autorizado: Token no proporcionado' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: 'Acceso prohibido: Token no válido' });
+        }
+        req.user = user;
+        next();
+    });
+}
+
+// ONE-TIME-USE: Endpoint to set up initial admin users
+app.post('/api/setup-users', async (req, res) => {
+    // Simple password protection for this endpoint
+    if (req.body.secret !== process.env.JWT_SECRET) {
+        return res.status(401).send('No autorizado');
+    }
+
+    const users = [
+        { username: 'diego', email: 'contacto@petgas.com.mx', password: 'NyeaR[QcW;tP' },
+        { username: 'admin', email: 'nfts2030@gmail.com', password: 'R1712admin2019!' }
+    ];
+
+    try {
+        for (const user of users) {
+            const salt = await bcrypt.genSalt(10);
+            const password_hash = await bcrypt.hash(user.password, salt);
+
+            const { data, error } = await supabase
+                .from('users')
+                .insert([
+                    { username: user.username, email: user.email, password_hash: password_hash }
+                ]);
+
+            if (error) {
+                // Handle potential duplicate users gracefully
+                if (error.code === '23505') { // Unique violation
+                    console.log(`Usuario ${user.username} ya existe.`);
+                } else {
+                    throw error;
+                }
+            }
+        }
+        res.status(201).json({ message: 'Usuarios creados o actualizados exitosamente.' });
+    } catch (error) {
+        console.error('Error al configurar usuarios:', error);
+        res.status(500).json({ error: 'Error interno del servidor al crear usuarios.' });
+    }
+});
+
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email y contraseña son requeridos.' });
+    }
+
+    try {
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('id, username, email, password_hash')
+            .eq('email', email)
+            .single();
+
+        if (error || !users) {
+            return res.status(404).json({ error: 'Usuario no encontrado.' });
+        }
+
+        const user = users;
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Contraseña incorrecta.' });
+        }
+
+        const payload = {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        };
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '8h' });
+
+        res.json({
+            message: 'Login exitoso',
+            token: token
+        });
+
+    } catch (error) {
+        console.error('Error en el login:', error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
+
+
+app.get('/admin/data', verifyToken, async (req, res) => {
     const { data, error } = await supabase
         .from('clientes')
         .select('*');
@@ -217,7 +327,7 @@ app.get('/admin/data', async (req, res) => {
 // Manejador de errores 404
 app.use((req, res, next) => {
     console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ 
+    res.status(404).json({
         error: 'Ruta no encontrada',
         path: req.path,
         method: req.method
