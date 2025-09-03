@@ -5,14 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - PetGas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- jsPDF Libraries for Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        body {
+        body { 
             font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+        }
+        #dashboard-section, #login-section { display: none; }
+        .login-body { 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .table-header {
+            background-color: #0a4b2a;
         }
         .modal {
             transition: opacity 0.25s ease;
@@ -21,79 +32,122 @@
             overflow-x: hidden;
             overflow-y: visible !important;
         }
-        .table-row-hover:hover {
-            background-color: #f9fafb;
+        .export-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="antialiased text-gray-800">
 
-    <div class="flex h-screen bg-gray-50">
-        <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-md">
-            <div class="p-6">
-                <img src="https://petgasmexico-v2.vercel.app/img/hero/logoGlow.png" alt="PetGas Logo" class="w-32 mx-auto">
+    <!-- Login Section -->
+    <div id="login-section" class="flex items-center justify-center min-h-screen px-4 login-body">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white/80 rounded-2xl shadow-2xl">
+            <img src="https://petgasmexico-v2.vercel.app/img/hero/logoGlow.png" alt="PetGas Logo" class="w-32 mx-auto">
+            <h2 class="text-3xl font-bold text-center text-gray-800">Acceso de Admin</h2>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required class="block w-full px-4 py-3 mt-1 text-gray-700 border-2 border-gray-200 rounded-xl" placeholder="tu@email.com">
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-semibold text-gray-700">Contraseña</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required class="block w-full px-4 py-3 mt-1 text-gray-700 border-2 border-gray-200 rounded-xl" placeholder="********">
+                </div>
+                <div>
+                    <button type="submit" class="w-full px-4 py-3 font-bold text-white rounded-xl bg-green-700 hover:bg-green-800">
+                        Iniciar Sesión
+                    </button>
+                </div>
+                <p id="login-error" class="text-sm font-medium text-red-600 text-center h-4"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="flex h-screen">
+        <div class="w-64 bg-[#0a4b2a] text-gray-100 flex flex-col">
+            <div class="p-6 flex items-center justify-center border-b border-green-700">
+                <img src="https://petgasmexico-v2.vercel.app/img/hero/logoGlow.png" alt="PetGas Logo" class="w-32">
             </div>
-            <nav class="mt-6">
-                <a href="#" class="flex items-center px-6 py-2 text-gray-700 bg-gray-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <nav class="mt-6 flex-1">
+                <a href="#" class="flex items-center px-6 py-3 text-gray-100 bg-green-700">
+                    <i class="fas fa-tachometer-alt w-6 text-center"></i>
                     <span class="mx-3">Dashboard</span>
                 </a>
             </nav>
+            <div class="p-6 border-t border-green-700">
+                 <button id="logout-btn" class="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt w-6 text-center"></i>
+                    <span class="mx-3">Cerrar Sesión</span>
+                </button>
+            </div>
         </div>
-
-        <!-- Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="flex justify-between items-center p-6 bg-white border-b-2 border-gray-200">
-                <h1 class="text-2xl font-semibold text-gray-700">Dashboard</h1>
-                <button id="create-new-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Crear Nuevo</button>
+            <header class="flex justify-between items-center p-6 bg-white border-b-2 border-gray-100">
+                <h1 class="text-2xl font-bold text-gray-800">Dashboard de Incidencias</h1>
+                 <div class="text-right">
+                    <p class="text-sm text-gray-500">Bienvenido, <span id="user-email" class="font-medium"></span></p>
+                </div>
             </header>
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-md shadow-md transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-lg font-semibold text-gray-700">Total de Incidencias</h2>
-                        <p class="mt-2 text-3xl font-bold text-gray-900" id="total-incidents">0</p>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="p-4 bg-green-100 rounded-full"><i class="fas fa-list-alt fa-2x text-green-600"></i></div>
+                        <div class="ml-4">
+                            <h2 class="text-lg font-semibold text-gray-500">Total de Incidencias</h2>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="total-incidents">0</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-md shadow-md transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-lg font-semibold text-gray-700">Quejas</h2>
-                        <p class="mt-2 text-3xl font-bold text-gray-900" id="total-quejas">0</p>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="p-4 bg-red-100 rounded-full"><i class="fas fa-exclamation-triangle fa-2x text-red-600"></i></div>
+                        <div class="ml-4">
+                            <h2 class="text-lg font-semibold text-gray-500">Quejas</h2>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="total-quejas">0</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-md shadow-md transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-lg font-semibold text-gray-700">Sugerencias</h2>
-                        <p class="mt-2 text-3xl font-bold text-gray-900" id="total-sugerencias">0</p>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="p-4 bg-yellow-100 rounded-full"><i class="fas fa-lightbulb fa-2x text-yellow-600"></i></div>
+                        <div class="ml-4">
+                            <h2 class="text-lg font-semibold text-gray-500">Sugerencias</h2>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="total-sugerencias">0</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-md shadow-md transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-lg font-semibold text-gray-700">Consultas</h2>
-                        <p class="mt-2 text-3xl font-bold text-gray-900" id="total-consultas">0</p>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="p-4 bg-blue-100 rounded-full"><i class="fas fa-question-circle fa-2x text-blue-600"></i></div>
+                        <div class="ml-4">
+                            <h2 class="text-lg font-semibold text-gray-500">Consultas</h2>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="total-consultas">0</p>
+                        </div>
                     </div>
                 </div>
-
-                <div class="mt-8">
+                <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
                     <div id="incidents-chart"></div>
                 </div>
-
-                <div class="mt-8 bg-white p-6 rounded-md shadow-md">
-                    <h2 class="text-lg font-semibold text-gray-700 mb-4">Todas las Incidencias</h2>
-                    <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-                        <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
+                <div class="mt-8 bg-white rounded-xl shadow-md">
+                    <div class="p-6 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800">Todas las Incidencias</h2>
+                        <div class="flex space-x-2">
+                            <button id="export-csv-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 export-btn flex items-center"><i class="fas fa-file-csv mr-2"></i>Exportar a CSV</button>
+                            <button id="export-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 export-btn flex items-center"><i class="fas fa-file-pdf mr-2"></i>Exportar a PDF</button>
+                        </div>
+                    </div>
+                    <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 pb-4 overflow-x-auto">
+                        <div class="inline-block min-w-full align-middle">
                             <table class="min-w-full leading-normal">
                                 <thead>
                                     <tr>
-                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cliente</th>
-                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Referencia</th>
-                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Categoría</th>
-                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha</th>
-                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Acciones</th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 table-header text-left text-xs font-semibold text-gray-100 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 table-header text-left text-xs font-semibold text-gray-100 uppercase tracking-wider">Referencia</th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 table-header text-left text-xs font-semibold text-gray-100 uppercase tracking-wider">Categoría</th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 table-header text-left text-xs font-semibold text-gray-100 uppercase tracking-wider">Fecha</th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 table-header text-left text-xs font-semibold text-gray-100 uppercase tracking-wider">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="data-table">
-                                    <!-- Loading spinner -->
-                                    <tr>
-                                        <td colspan="5" class="text-center py-10">
-                                            <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-indigo-500 mx-auto"></div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                <tbody id="data-table"></tbody>
                             </table>
                         </div>
                     </div>
@@ -103,34 +157,102 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center">
+    <div id="details-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center">
         <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
-        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+        <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 overflow-y-auto">
             <div class="modal-content py-4 text-left px-6">
-                <div class="flex justify-between items-center pb-3">
-                    <p class="text-2xl font-bold" id="modal-title">Detalles del Cliente</p>
+                <div class="flex justify-between items-center pb-3 border-b">
+                    <p class="text-2xl font-bold text-gray-800">Detalles de la Incidencia</p>
                     <div class="modal-close cursor-pointer z-50">
                         <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path></svg>
                     </div>
                 </div>
-                <div id="modal-body"></div>
-                <div class="flex justify-end pt-2">
-                    <button class="modal-close px-4 bg-transparent p-3 rounded-lg text-indigo-500 hover:bg-gray-100 hover:text-indigo-400 mr-2">Cerrar</button>
-                    <button id="save-changes" class="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400">Guardar Cambios</button>
+                <div id="modal-body" class="my-5"></div>
+                <div class="flex justify-end pt-2 border-t">
+                    <button class="modal-close px-4 bg-gray-200 p-3 rounded-lg text-gray-800 hover:bg-gray-300">Cerrar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const supabaseUrl = 'https://cxikdsbrpvbfmqnbwawa.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4aWtkc2JycHZiZm1xbmJ3YXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxODU2OTIsImV4cCI6MjA1ODc2MTY5Mn0.5SNyKOfNyV23jfWsLVWvMnYUPiLsQ-lG56_JLoQJrfk';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
         const tableBody = document.getElementById('data-table');
-        const searchInput = document.getElementById('search');
-        let allData = [];
+        const userEmailSpan = document.getElementById('user-email');
+        const modal = document.getElementById('details-modal');
+        const modalBody = document.getElementById('modal-body');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
         let chart = null;
+        let allData = [];
+
+        function showLogin() {
+            document.body.classList.add('login-body');
+            loginSection.style.display = 'flex';
+            dashboardSection.style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.body.classList.remove('login-body');
+            loginSection.style.display = 'none';
+            dashboardSection.style.display = 'flex';
+        }
+
+        function parseJwt(token) {
+            try {
+                return JSON.parse(atob(token.split('.')[1]));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function fetchData() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                showLogin();
+                return;
+            }
+
+            const userData = parseJwt(token);
+            if (userData && userData.email) {
+                userEmailSpan.textContent = userData.email;
+            }
+
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-10"><div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-green-500 mx-auto"></div></td></tr>';
+
+            try {
+                const response = await fetch('/api/admin/data', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('authToken');
+                    showLogin();
+                    loginError.textContent = 'Sesión expirada. Por favor, inicia sesión de nuevo.';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar los datos.');
+                }
+
+                const data = await response.json();
+                allData = data;
+                renderTable(data);
+                updateDashboardStats(data);
+                showDashboard();
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-500">${error.message}</td></tr>`;
+            }
+        }
 
         function renderTable(data) {
             tableBody.innerHTML = '';
@@ -140,108 +262,32 @@
             }
             data.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = 'table-row-hover';
+                tr.className = 'hover:bg-gray-50';
                 tr.innerHTML = `
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">${row.nombre}</p></td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">${row.referencia}</p></td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><span class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight"><span aria-hidden class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span><span class="relative">${row.categoria || 'N/A'}</span></span></td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">${new Date(row.created_at).toLocaleString()}</p></td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <button onclick="openModal(${row.id})" class="text-indigo-600 hover:text-indigo-900">Ver/Editar</button>
-                        <button onclick="deleteRow(${row.id})" class="text-red-600 hover:text-red-900 ml-4">Eliminar</button>
+                    <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">${row.nombre}</p></td>
+                    <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">${row.referencia}</p></td>
+                    <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm"><span class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight"><span aria-hidden class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span><span class="relative">${row.categoria || 'N/A'}</span></span></td>
+                    <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm"><p class="text-gray-900 whitespace-no-wrap">${new Date(row.created_at).toLocaleString()}</p></td>
+                    <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm">
+                        <button onclick="openModal(${row.id})" class="text-green-600 hover:text-green-900 font-semibold">Ver Detalles</button>
                     </td>
                 `;
                 tableBody.appendChild(tr);
             });
         }
 
-        function updateDashboard(data) {
-            document.getElementById('total-incidents').innerText = data.length;
-            document.getElementById('total-quejas').innerText = data.filter(row => row.categoria === 'Queja').length;
-            document.getElementById('total-sugerencias').innerText = data.filter(row => row.categoria === 'Sugerencia').length;
-            document.getElementById('total-consultas').innerText = data.filter(row => row.categoria === 'Consulta').length;
-
-            const options = {
-                series: [{
-                    name: 'Incidencias',
-                    data: [
-                        data.filter(row => row.categoria === 'Queja').length,
-                        data.filter(row => row.categoria === 'Sugerencia').length,
-                        data.filter(row => row.categoria === 'Consulta').length,
-                        data.filter(row => row.categoria === 'Otro').length
-                    ]
-                }],
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                    },
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                xaxis: {
-                    categories: ['Quejas', 'Sugerencias', 'Consultas', 'Otros'],
-                }
-            };
-
-            if (chart) {
-                chart.updateOptions(options);
-            } else {
-                chart = new ApexCharts(document.querySelector("#incidents-chart"), options);
-                chart.render();
-            }
-        }
-
-        async function fetchData() {
-            const { data, error } = await supabase.from('clientes').select('*');
-            if (error) {
-                console.error('Error fetching data:', error);
-                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-500">Error al cargar los datos</td></tr>';
-                return;
-            }
-            allData = data;
-            renderTable(allData);
-            updateDashboard(allData);
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredData = allData.filter(row => {
-                    return (
-                        row.nombre.toLowerCase().includes(searchTerm) ||
-                        row.referencia.toLowerCase().includes(searchTerm) ||
-                        (row.categoria && row.categoria.toLowerCase().includes(searchTerm))
-                    );
-                });
-                renderTable(filteredData);
-            });
-        }
-
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-        const saveChangesBtn = document.getElementById('save-changes');
-        let currentEditingId = null;
-
-        function openModal(id = null) {
-            currentEditingId = id;
-            const isNew = id === null;
-            modalTitle.innerText = isNew ? 'Crear Nuevo Registro' : 'Detalles del Cliente';
-            const rowData = isNew ? {} : allData.find(row => row.id === id);
+        function openModal(id) {
+            const incident = allData.find(row => row.id === id);
+            if (!incident) return;
 
             modalBody.innerHTML = `
-                <form id="edit-form">
-                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">Nombre</label><input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="nombre" type="text" value="${rowData.nombre || ''}"></div>
-                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label><input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="email" type="email" value="${rowData.email || ''}"></div>
-                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2" for="telefono">Teléfono</label><input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="telefono" type="tel" value="${rowData.telefono || ''}"></div>
-                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2" for="mensaje">Mensaje</label><textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="mensaje">${rowData.mensaje || ''}</textarea></div>
-                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2" for="categoria">Categoría</label><input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="categoria" type="text" value="${rowData.categoria || ''}"></div>
-                </form>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-500">Nombre</p><p class="text-gray-800">${incident.nombre}</p></div>
+                    <div class="bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-500">Email</p><p class="text-gray-800">${incident.email}</p></div>
+                    <div class="bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-500">Teléfono</p><p class="text-gray-800">${incident.telefono || 'No proporcionado'}</p></div>
+                    <div class="bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-500">Referencia</p><p class="text-gray-800">${incident.referencia}</p></div>
+                    <div class="md:col-span-2 bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-500">Mensaje</p><p class="text-gray-800 whitespace-pre-wrap">${incident.mensaje}</p></div>
+                </div>
             `;
             modal.classList.remove('opacity-0', 'pointer-events-none');
             document.body.classList.add('modal-active');
@@ -253,56 +299,126 @@
         }
 
         document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', closeModal));
-        document.querySelector('.modal-overlay').addEventListener('click', closeModal);
-        document.getElementById('create-new-btn').addEventListener('click', () => openModal());
+        const modalOverlay = document.querySelector('.modal-overlay');
+        if(modalOverlay) modalOverlay.addEventListener('click', closeModal);
 
-        saveChangesBtn.addEventListener('click', async () => {
-            const updatedData = {
-                nombre: document.getElementById('nombre').value,
-                email: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value,
-                mensaje: document.getElementById('mensaje').value,
-                categoria: document.getElementById('categoria').value,
+        function updateDashboardStats(data) {
+            document.getElementById('total-incidents').innerText = data.length;
+            const quejas = data.filter(row => row.categoria === 'Queja').length;
+            const sugerencias = data.filter(row => row.categoria === 'Sugerencia').length;
+            const consultas = data.filter(row => row.categoria === 'Consulta').length;
+            const otros = data.filter(row => !row.categoria || !['Queja', 'Sugerencia', 'Consulta'].includes(row.categoria)).length;
+
+            document.getElementById('total-quejas').innerText = quejas;
+            document.getElementById('total-sugerencias').innerText = sugerencias;
+            document.getElementById('total-consultas').innerText = consultas;
+
+            const options = {
+                series: [{ name: 'Incidencias', data: [quejas, sugerencias, consultas, otros] }],
+                chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                colors: ['#EF4444', '#FBBF24', '#3B82F6', '#6B7280'],
+                plotOptions: { bar: { horizontal: false, columnWidth: '55%', distributed: true, borderRadius: 8 } },
+                dataLabels: { enabled: false },
+                legend: { show: false },
+                xaxis: { categories: ['Quejas', 'Sugerencias', 'Consultas', 'Otros'] },
+                yaxis: { title: { text: 'Cantidad' } },
+                grid: { borderColor: '#f1f1f1' }
             };
 
-            let error;
-            if (currentEditingId) {
-                ({ error } = await supabase.from('clientes').update(updatedData).eq('id', currentEditingId));
+            if (chart) {
+                chart.updateOptions(options);
             } else {
-                ({ error } = await supabase.from('clientes').insert([updatedData]));
+                chart = new ApexCharts(document.querySelector("#incidents-chart"), options);
+                chart.render();
             }
+        }
+        
+        function exportToCSV() {
+            const headers = ['ID', 'Nombre', 'Email', 'Telefono', 'Mensaje', 'Referencia', 'Categoria', 'Fecha Creacion'];
+            const rows = allData.map(row => [
+                row.id,
+                `"${row.nombre}"`,
+                `"${row.email}"`,
+                `"${row.telefono || ''}"`,
+                `"${(row.mensaje || '').replace(/"/g, "'")}"`,
+                `"${row.referencia}"`,
+                `"${row.categoria || 'N/A'}"`,
+                `"${new Date(row.created_at).toISOString()}"`
+            ]);
 
-            if (error) {
-                console.error('Error saving data:', error);
-                alert('Error al guardar los cambios');
-            } else {
-                alert('Cambios guardados con éxito');
-                closeModal();
+            let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "incidencias_petgas.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.autoTable({
+                head: [['ID', 'Nombre', 'Email', 'Referencia', 'Categoria', 'Fecha']],
+                body: allData.map(row => [
+                    row.id,
+                    row.nombre,
+                    row.email,
+                    row.referencia,
+                    row.categoria || 'N/A',
+                    new Date(row.created_at).toLocaleDateString()
+                ]),
+            });
+
+            doc.save('incidencias_petgas.pdf');
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.textContent = '';
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Error en el inicio de sesión');
+                }
+
+                localStorage.setItem('authToken', result.token);
                 fetchData();
+
+            } catch (error) {
+                console.error('Login failed:', error);
+                loginError.textContent = error.message;
             }
         });
 
-        async function deleteRow(id) {
-            if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
-                const { error } = await supabase.from('clientes').delete().eq('id', id);
-                if (error) {
-                    console.error('Error deleting data:', error);
-                    alert('Error al eliminar el registro');
-                } else {
-                    alert('Registro eliminado con éxito');
-                    fetchData();
-                }
-            }
-        }
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            showLogin();
+        });
 
-        supabase.channel('clientes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, payload => {
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        exportPdfBtn.addEventListener('click', exportToPDF);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (token) {
                 fetchData();
-            })
-            .subscribe();
-
-        fetchData();
-
+            } else {
+                showLogin();
+            }
+        });
     </script>
 </body>
 </html>

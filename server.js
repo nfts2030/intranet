@@ -247,44 +247,7 @@ function verifyToken(req, res, next) {
     });
 }
 
-// ONE-TIME-USE: Endpoint to set up initial admin users
-app.post('/api/setup-users', async (req, res) => {
-    // Simple password protection for this endpoint
-    if (req.body.secret !== process.env.JWT_SECRET) {
-        return res.status(401).send('No autorizado');
-    }
-
-    const users = [
-        { username: 'diego', email: 'contacto@petgas.com.mx', password: 'NyeaR[QcW;tP' },
-        { username: 'admin', email: 'nfts2030@gmail.com', password: 'R1712admin2019!' }
-    ];
-
-    try {
-        for (const user of users) {
-            const salt = await bcrypt.genSalt(10);
-            const password_hash = await bcrypt.hash(user.password, salt);
-
-            const { data, error } = await supabase
-                .from('users')
-                .insert([
-                    { username: user.username, email: user.email, password_hash: password_hash }
-                ]);
-
-            if (error) {
-                // Handle potential duplicate users gracefully
-                if (error.code === '23505') { // Unique violation
-                    console.log(`Usuario ${user.username} ya existe.`);
-                } else {
-                    throw error;
-                }
-            }
-        }
-        res.status(201).json({ message: 'Usuarios creados o actualizados exitosamente.' });
-    } catch (error) {
-        console.error('Error al configurar usuarios:', error);
-        res.status(500).json({ error: 'Error interno del servidor al crear usuarios.' });
-    }
-});
+// The /api/setup-users endpoint was removed for security.
 
 
 // Login endpoint
@@ -333,7 +296,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-app.get('/admin/data', verifyToken, async (req, res) => {
+app.get('/api/admin/data', verifyToken, async (req, res) => {
     const { data, error } = await supabase
         .from('clientes')
         .select('*');
@@ -349,11 +312,18 @@ app.get('/admin/data', verifyToken, async (req, res) => {
 // Manejador de errores 404
 app.use((req, res, next) => {
     console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({
+    res.status(404).json({ 
         error: 'Ruta no encontrada',
         path: req.path,
         method: req.method
     });
 });
+
+// Start the server only when run directly
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Servidor corriendo en http://localhost:${port}`);
+    });
+}
 
 module.exports = app;
