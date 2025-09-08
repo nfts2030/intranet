@@ -87,7 +87,7 @@
             <header class="flex justify-between items-center p-6 bg-white border-b-2 border-gray-100">
                 <h1 class="text-2xl font-bold text-gray-800">Dashboard de Incidencias</h1>
                  <div class="text-right">
-                    <p class="text-sm text-gray-500">Bienvenido, <span id="user-email" class="font-medium"></span></p>
+                    <p class="text-sm text-gray-500">Bienvenido, <span id="user-username" class="font-medium"></span> (<span id="user-email" class="font-medium"></span>)</p>
                 </div>
             </header>
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
@@ -179,6 +179,7 @@
         const logoutBtn = document.getElementById('logout-btn');
         const tableBody = document.getElementById('data-table');
         const userEmailSpan = document.getElementById('user-email');
+        const userUsernameSpan = document.getElementById('user-username');
         const modal = document.getElementById('details-modal');
         const modalBody = document.getElementById('modal-body');
         const exportCsvBtn = document.getElementById('export-csv-btn');
@@ -215,6 +216,11 @@
             const userData = parseJwt(token);
             if (userData && userData.email) {
                 userEmailSpan.textContent = userData.email;
+                if (userData.username) {
+                    userUsernameSpan.textContent = userData.username;
+                } else {
+                    userUsernameSpan.textContent = userData.email;
+                }
             }
 
             tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-10"><div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-green-500 mx-auto"></div></td></tr>';
