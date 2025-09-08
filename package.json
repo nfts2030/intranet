@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "show-sql": "node api/show_update_sql.js"
   },
   "engines": {
     "node": ">=14.x"

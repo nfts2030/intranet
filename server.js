@@ -309,6 +309,82 @@ app.get('/api/admin/data', verifyToken, async (req, res) => {
     res.json(data);
 });
 
+// API endpoint for updating incident response status
+app.put('/api/admin/incidents/:id', verifyToken, async (req, res) => {
+    console.log('PUT /api/admin/incidents/:id route hit');
+    const { id } = req.params;
+    const { response_status, responded_by, response_message } = req.body;
+    const user = req.user; // Get user info from JWT token
+
+    try {
+        // Validate incident ID
+        if (!id || isNaN(id)) {
+            return res.status(400).json({ error: 'ID de incidente inválido' });
+        }
+
+        // Validate required fields
+        if (!response_status) {
+            return res.status(400).json({ error: 'Estado de respuesta es requerido' });
+        }
+
+        // Prepare update data
+        const updateData = {
+            response_status,
+            responded_by: responded_by || user.username || user.email,
+            response_date: new Date().toISOString()
+        };
+
+        // Add response message if provided
+        if (response_message !== undefined) {
+            updateData.response_message = response_message;
+        }
+
+        // Update the incident in Supabase
+        const { data, error } = await supabase
+            .from('clientes')
+            .update(updateData)
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Error updating incident:', error);
+            return res.status(500).json({ error: 'Error al actualizar el incidente' });
+        }
+
+        if (data.length === 0) {
+            return res.status(404).json({ error: 'Incidente no encontrado' });
+        }
+
+        res.json({
+            message: 'Incidente actualizado exitosamente',
+            incident: data[0]
+        });
+
+    } catch (error) {
+        console.error('Error updating incident:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// API endpoint for fetching list of users
+app.get('/api/admin/users', verifyToken, async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, username, email');
+
+        if (error) {
+            console.error('Error fetching users:', error);
+            return res.status(500).json({ error: 'Error al obtener la lista de usuarios' });
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Manejador de errores 404
 app.use((req, res, next) => {
     console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);

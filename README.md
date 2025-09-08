@@ -43,6 +43,13 @@ Este proyecto integra Supabase y Gemini con un formulario de contacto existente 
 4.  **Actualizar `admin.html`:**
     Reemplaza `YOUR_SUPABASE_URL` y `YOUR_SUPABASE_KEY` en el archivo `admin.html` con tus credenciales reales de Supabase.
 
+5.  **Actualizar la tabla `clientes` para seguimiento de respuestas:**
+    Ejecuta el siguiente comando para ver las instrucciones SQL necesarias:
+    ```bash
+    npm run show-sql
+    ```
+    Luego copia y pega las instrucciones en el SQL Editor de tu dashboard de Supabase.
+
 ## Cómo Ejecutar el Proyecto Localmente
 
 El proyecto utiliza un servidor de Node.js. Asegúrate de tener Node.js y npm instalados.
