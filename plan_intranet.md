@@ -40,7 +40,7 @@ Crear una intranet interna para gestión de clientes e incidencias, migrando dat
 
 - **Plantilla de Correo**:
   ```html
-  <p>Su solicitud ha sido recibida. Número de referencia: <strong>{{ uuid }}</strong></p>
+  <p>Su solicitud ha sido recibida. Número de referencia: <strong>{{ reference_code }}</strong></p>
   ```
 
 ---

@@ -37,6 +37,16 @@ const bodyParser = require('body-parser');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
+
+// Function to generate short, uppercase reference codes
+function generateReferenceCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'PET-';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -147,7 +157,7 @@ app.post('/api/contacto', async (req, res) => {
             }
         });
     }
-    const referencia = uuidv4();
+    const referencia = generateReferenceCode();
 
     const { data: insertData, error: insertError } = await supabase
         .from('clientes')
