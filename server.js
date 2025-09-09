@@ -385,6 +385,119 @@ app.get('/api/admin/users', verifyToken, async (req, res) => {
     }
 });
 
+// API endpoint for sending email responses to clients
+app.post('/api/admin/incidents/:id/respond', verifyToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { response_message, response_subject } = req.body;
+        const user = req.user; // Get user info from JWT token
+
+        // Validate incident ID
+        if (!id || isNaN(id)) {
+            return res.status(400).json({ error: 'ID de incidente inválido' });
+        }
+
+        // Validate required fields
+        if (!response_message) {
+            return res.status(400).json({ error: 'Mensaje de respuesta es requerido' });
+        }
+
+        // Fetch incident details from Supabase
+        const { data: incidentData, error: incidentError } = await supabase
+            .from('clientes')
+            .select('nombre, email, telefono, mensaje, referencia, categoria, created_at')
+            .eq('id', id)
+            .single();
+
+        if (incidentError) {
+            console.error('Error fetching incident:', incidentError);
+            return res.status(500).json({ error: 'Error al obtener los datos del incidente' });
+        }
+
+        if (!incidentData) {
+            return res.status(404).json({ error: 'Incidente no encontrado' });
+        }
+
+        // Create email transporter
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE === 'ssl', // true for 465, false for other ports
+            auth: {
+                user: process.env.SMTP_USERNAME,
+                pass: process.env.SMTP_PASSWORD
+            }
+        });
+
+        // Prepare email content
+        const subject = response_subject || `Respuesta a su solicitud: ${incidentData.referencia}`;
+        
+        const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #0a4b2a; color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0;">PetGas - Respuesta a su solicitud</h1>
+                </div>
+                <div style="padding: 20px; background-color: #f9f9f9;">
+                    <p>Estimado(a) <strong>${incidentData.nombre}</strong>,</p>
+                    <p>Gracias por contactarnos. A continuación le proporcionamos una respuesta a su solicitud con referencia <strong>${incidentData.referencia}</strong>:</p>
+                    <div style="background-color: white; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                        <h3 style="color: #0a4b2a; margin-top: 0;">Respuesta de nuestro equipo:</h3>
+                        <p style="white-space: pre-wrap;">${response_message}</p>
+                    </div>
+                    <div style="background-color: #f0f0f0; border-left: 4px solid #0a4b2a; padding: 10px; margin: 20px 0;">
+                        <h4 style="margin-top: 0;">Detalles de su solicitud original:</h4>
+                        <p><strong>Referencia:</strong> ${incidentData.referencia}</p>
+                        <p><strong>Categoría:</strong> ${incidentData.categoria || 'No especificada'}</p>
+                        <p><strong>Fecha:</strong> ${new Date(incidentData.created_at).toLocaleDateString('es-ES')}</p>
+                    </div>
+                    <p>Atentamente,<br><strong>${user.username || user.email}</strong><br>Equipo de Soporte - PetGas</p>
+                </div>
+                <div style="background-color: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
+                    <p>Este es un mensaje automático. Por favor no responda a este correo.</p>
+                    <p>PetGas - Servicio al Cliente</p>
+                </div>
+            </div>
+        `;
+
+        // Send email
+        const mailOptions = {
+            from: process.env.MAIL_FROM,
+            to: incidentData.email,
+            subject: subject,
+            html: htmlContent
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`Response email sent to ${incidentData.email} for incident ${id}`);
+
+        // Update incident with response info
+        const { data: updateData, error: updateError } = await supabase
+            .from('clientes')
+            .update({
+                response_message: response_message,
+                responded_by: user.username || user.email,
+                response_date: new Date().toISOString(),
+                response_status: 'Resuelto'
+            })
+            .eq('id', id)
+            .select();
+
+        if (updateError) {
+            console.error('Error updating incident:', updateError);
+            // Don't fail the request if we can't update the database, since the email was sent
+        }
+
+        res.json({
+            message: 'Respuesta enviada exitosamente',
+            incident: updateData ? updateData[0] : incidentData
+        });
+
+    } catch (error) {
+        console.error('Error sending response email:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Manejador de errores 404
 app.use((req, res, next) => {
     console.log(`404 - Ruta no encontrada: ${req.method} ${req.originalUrl}`);

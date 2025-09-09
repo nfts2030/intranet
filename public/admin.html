@@ -313,6 +313,11 @@
     </div>
 
     <script>
+        // Configuration
+        // Use the same origin as the frontend, but ensure we're using the correct port
+        const API_BASE_URL = window.location.origin;
+        console.log('API Base URL:', API_BASE_URL); // Debug log
+        
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const loginForm = document.getElementById('login-form');
@@ -376,7 +381,7 @@
 
             try {
                 // Fetch incidents data
-                const incidentsResponse = await fetch('/api/admin/data', {
+                const incidentsResponse = await fetch(`${API_BASE_URL}/api/admin/data`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -398,7 +403,7 @@
                 filteredData = [...incidentsData]; // Initialize filteredData with all data
 
                 // Fetch users data
-                const usersResponse = await fetch('/api/admin/users', {
+                const usersResponse = await fetch(`${API_BASE_URL}/api/admin/users`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -643,14 +648,14 @@
                 </div>
                 
                 <!-- Response Update Form -->
-                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div class="mt-6 p-4 bg-gray-50/50 glass-card rounded-lg">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Actualizar Estado de Respuesta</h3>
                     <form id="response-form" class="space-y-4">
-                        <input type="hidden" id="incident-id" value="${id}">
+                        <input type="hidden" id="incident-id-status" value="${id}">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="response-status" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                                <select id="response-status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <select id="response-status" class="w-full px-3 py-2 glass-input rounded-lg focus:outline-none">
                                     <option value="Pendiente" ${responseStatus === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                                     <option value="En Progreso" ${responseStatus === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
                                     <option value="Resuelto" ${responseStatus === 'Resuelto' ? 'selected' : ''}>Resuelto</option>
@@ -659,25 +664,56 @@
                             </div>
                             <div>
                                 <label for="responded-by" class="block text-sm font-medium text-gray-700 mb-1">Asignado a</label>
-                                <select id="responded-by" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <select id="responded-by" class="w-full px-3 py-2 glass-input rounded-lg focus:outline-none">
                                     ${usersOptions}
                                 </select>
                             </div>
                         </div>
                         <div>
                             <label for="response-message" class="block text-sm font-medium text-gray-700 mb-1">Mensaje de Respuesta</label>
-                            <textarea id="response-message" rows="3" placeholder="Escribe la respuesta aquí..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">${responseMessage}</textarea>
+                            <textarea id="response-message" rows="3" placeholder="Escribe la respuesta aquí..." class="w-full px-3 py-2 glass-input rounded-lg focus:outline-none">${responseMessage}</textarea>
                         </div>
                         <div class="flex justify-end space-x-3">
-                            <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">Actualizar</button>
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-gray-200/70 glass-button rounded-lg hover:bg-gray-300/80">Cancelar</button>
+                            <button type="submit" class="px-4 py-2 text-white glass-button-primary rounded-lg">Actualizar</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Email Response Form -->
+                <div class="mt-6 p-4 bg-gray-50/50 glass-card rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Responder por Email</h3>
+                    <form id="email-response-form" class="space-y-4">
+                        <input type="hidden" id="incident-id-email" value="${id}">
+                        <div>
+                            <label for="response-subject" class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
+                            <input type="text" id="response-subject" value="Respuesta a su solicitud: ${incident.referencia}" class="w-full px-3 py-2 glass-input rounded-lg focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="response-message-email" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+                            <textarea id="response-message-email" rows="4" placeholder="Escriba su respuesta aquí..." class="w-full px-3 py-2 glass-input rounded-lg focus:outline-none"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-gray-200/70 glass-button rounded-lg hover:bg-gray-300/80">Cancelar</button>
+                            <button type="submit" class="px-4 py-2 text-white glass-button-primary rounded-lg flex items-center">
+                                <i class="fas fa-paper-plane mr-2"></i> Enviar Respuesta
+                            </button>
                         </div>
                     </form>
                 </div>
             `;
             
-            // Add event listener to the form
-            document.getElementById('response-form').addEventListener('submit', updateResponseStatus);
+            // Add event listeners to both forms
+            const responseForm = document.getElementById('response-form');
+            const emailResponseForm = document.getElementById('email-response-form');
+            
+            if (responseForm) {
+                responseForm.addEventListener('submit', updateResponseStatus);
+            }
+            
+            if (emailResponseForm) {
+                emailResponseForm.addEventListener('submit', sendEmailResponse);
+            }
             
             modal.classList.remove('opacity-0', 'pointer-events-none');
             document.body.classList.add('modal-active');
@@ -693,7 +729,7 @@
             event.preventDefault();
             
             const form = event.target;
-            const id = document.getElementById('incident-id').value;
+            const id = document.getElementById('incident-id-status').value;
             const responseStatus = document.getElementById('response-status').value;
             const respondedBy = document.getElementById('responded-by').value;
             const responseMessage = document.getElementById('response-message').value;
@@ -714,7 +750,9 @@
                 submitButton.disabled = true;
                 
                 // Send update request
-                const response = await fetch(`/api/admin/incidents/${id}`, {
+                const url = `${API_BASE_URL}/api/admin/incidents/${id}`;
+                console.log('Sending request to:', url); // Debug log
+                const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -753,6 +791,78 @@
                 // Reset loading state
                 const submitButton = form.querySelector('button[type="submit"]');
                 submitButton.innerHTML = 'Actualizar';
+                submitButton.disabled = false;
+            }
+        }
+        
+        // Function to send email response
+        async function sendEmailResponse(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const id = document.getElementById('incident-id-email').value;
+            const responseSubject = document.getElementById('response-subject').value;
+            const responseMessage = document.getElementById('response-message-email').value;
+            
+            // Get auth token
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                showLogin();
+                return;
+            }
+            
+            // Validate message
+            if (!responseMessage.trim()) {
+                alert('Por favor, escriba un mensaje de respuesta.');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.innerHTML = 'Enviando...';
+                submitButton.disabled = true;
+                
+                // Send email response request
+                const response = await fetch(`${API_BASE_URL}/api/admin/incidents/${id}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        response_message: responseMessage,
+                        response_subject: responseSubject
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Error al enviar la respuesta');
+                }
+                
+                // Update local data
+                const incidentIndex = allData.findIndex(item => item.id == id);
+                if (incidentIndex !== -1) {
+                    allData[incidentIndex] = { ...allData[incidentIndex], ...result.incident };
+                }
+                
+                // Re-apply filters to update the view
+                applyFilters();
+                
+                // Close modal and show success message
+                closeModal();
+                alert('Respuesta enviada exitosamente al cliente');
+                
+            } catch (error) {
+                console.error('Error sending email response:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                // Reset loading state
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.innerHTML = 'Enviar Respuesta';
                 submitButton.disabled = false;
             }
         }
@@ -822,7 +932,7 @@
             const password = e.target.password.value;
 
             try {
-                const response = await fetch('/api/login', {
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
